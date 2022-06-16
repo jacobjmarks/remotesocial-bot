@@ -1,9 +1,21 @@
+import configparser
 import difflib
+import os
 import random
 import urllib.parse
 from typing import List
 
 import requests
+
+CONFIG_FILE_PATH = os.path.join(os.getcwd(), 'config.ini')
+
+if (not os.path.exists(CONFIG_FILE_PATH)):
+    raise Exception(f'No configuration file found! ({CONFIG_FILE_PATH})')
+
+config = configparser.ConfigParser()
+config.read(CONFIG_FILE_PATH)
+
+api_key = config.get('RAPID_API', 'API_KEY')
 
 
 def determine_answer(question, choices: List[str]):
@@ -15,7 +27,7 @@ def determine_answer(question, choices: List[str]):
         headers = {
             'X-User-Agent': 'desktop',
             'X-Proxy-Location': 'EU',
-            'X-RapidAPI-Key': None,
+            'X-RapidAPI-Key': api_key,
             'X-RapidAPI-Host': 'google-search3.p.rapidapi.com'
         }
         response = requests.get(request_url, headers=headers, timeout=7)
