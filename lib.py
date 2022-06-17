@@ -19,7 +19,7 @@ api_key = config.get('RAPID_API', 'API_KEY')
 
 
 def determine_answer(question, choices: List[str]):
-    print(f'Question: {question}')
+    print(f'\nQuestion: {question}')
 
     try:
         encoded_question = urllib.parse.quote_plus(question)
