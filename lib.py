@@ -18,30 +18,31 @@ config.read(CONFIG_FILE_PATH)
 api_key = config.get('RAPID_API', 'API_KEY')
 
 
-def determine_answer(question, choices: List[str]):
+def determine_answer(question: str, choices: List[str]):
     print(f'\nQuestion: {question}')
 
     try:
-        encoded_question = urllib.parse.quote_plus(question)
-        request_url = f'https://google-search3.p.rapidapi.com/api/v1/search/q={encoded_question}'
-        headers = {
-            'X-User-Agent': 'desktop',
-            'X-Proxy-Location': 'EU',
-            'X-RapidAPI-Key': api_key,
-            'X-RapidAPI-Host': 'google-search3.p.rapidapi.com'
+        request_url = 'https://serpapi.com/search.json'
+        params = {
+            "q": question,
+            "hl": "en",
+            "gl": "us",
+            "api_key": api_key,
         }
-        response = requests.get(request_url, headers=headers, timeout=7)
+        response = requests.get(request_url, params=params, timeout=10)
         response_json = response.json()
-        search_text = ' '.join(
-            map(lambda r: str(r['description']), response_json['results']))
+        try:
+            search_text = str(response_json['answer_box']['answer'])
+        except:
+            search_text = str(response_json['answer_box'])
         results = []
         out_list = []
         for choice in choices:
             matcher = difflib.SequenceMatcher(None, search_text, choice)
-            score = sum(n for i, j, n in matcher.get_matching_blocks()) / \
-                float(len(choice))
+            score = sum(n for i, j, n in matcher.get_matching_blocks()
+                        ) / float(len(choice))
             results.append(score)
-            out_list.append([choice, score])
+            out_list.append({choice, score})
         print(f'Answer: {out_list}')
         answer = choices[results.index(max(results))]
     except:
