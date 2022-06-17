@@ -39,10 +39,20 @@ async def play_game(invite_link):
     while (True):
         current_question = await get_question_text(page)
 
+        if (current_question.lower() == 'get ready'):
+            await page.waitFor(1000)
+            continue
+
         if (current_question == "Leaderboard"):
-            # game is over
-            await display_leaderboard(page)
-            break
+            if (await is_next_round(page)):
+                if (previous_question != None):
+                    print("\nWaiting for next round...")
+                previous_question = None
+                await page.waitFor(1000)
+                continue
+            else:
+                await display_leaderboard(page)
+                break
 
         if (previous_question != None and current_question == previous_question):
             # wait for next question
@@ -82,6 +92,15 @@ async def select_answer(page: Page, answer: str):
     await page.click(selector)
 
 
+async def is_next_round(page: Page):
+    selector = 'button.MuiButton-fullWidth span.MuiButton-label'
+    elementHandle = await page.querySelector(selector)
+    if (elementHandle == None):
+        return False
+    text = await get_text_content(elementHandle)
+    return text.lower() == "start next round"
+
+
 async def display_leaderboard(page: Page):
     list = await page.querySelectorAll('ul.MuiList-root li')
     print('\nLEADERBOARD')
@@ -94,7 +113,7 @@ async def display_leaderboard(page: Page):
 
 
 async def get_text_content(element: ElementHandle):
-    return await (await element.getProperty('textContent')).jsonValue()
+    return str(await (await element.getProperty('textContent')).jsonValue())
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=DeprecationWarning)
