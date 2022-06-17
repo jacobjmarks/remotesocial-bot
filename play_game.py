@@ -1,5 +1,7 @@
 import asyncio
 import os
+import random
+from typing import List
 import warnings
 
 from pyppeteer import launch
@@ -60,6 +62,7 @@ async def play_game(invite_link):
             continue
 
         choices = await get_answer_choices(page)
+        await select_answer(page, random.choice(choices))
         answer = determine_answer(current_question, choices)
         await select_answer(page, answer)
         previous_question = current_question
@@ -93,7 +96,7 @@ async def select_answer(page: Page, answer: str):
             await page.click(selector)
             break
         except:
-            await page.waitFor(1000)
+            await page.waitFor(100)
 
 
 async def is_next_round(page: Page):

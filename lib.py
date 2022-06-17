@@ -34,7 +34,11 @@ def determine_answer(question: str, choices: List[str]):
         try:
             search_text = str(response_json['answer_box']['answer'])
         except:
-            search_text = str(response_json['answer_box'])
+            try:
+                search_text = str(response_json['answer_box'])
+            except:
+                search_text = ' '.join(map(
+                    lambda r: f'{r["title"]} {str(r["snippet"])}', response_json['organic_results']))
         results = []
         out_list = []
         for choice in choices:
@@ -42,7 +46,7 @@ def determine_answer(question: str, choices: List[str]):
             score = sum(n for i, j, n in matcher.get_matching_blocks()
                         ) / float(len(choice))
             results.append(score)
-            out_list.append({choice, score})
+            out_list.append([choice, score])
         print(f'Answer: {out_list}')
         answer = choices[results.index(max(results))]
     except:
