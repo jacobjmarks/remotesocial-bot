@@ -88,8 +88,12 @@ async def get_answer_choices(page: Page):
 async def select_answer(page: Page, answer: str):
     selector = f'div.MuiGrid-root.MuiGrid-item button[value="{answer}"]'
     await page.waitForSelector(selector, visible=True)
-    await page.waitFor(2500)
-    await page.click(selector)
+    while (True):
+        try:
+            await page.click(selector)
+            break
+        except:
+            await page.waitFor(1000)
 
 
 async def is_next_round(page: Page):
