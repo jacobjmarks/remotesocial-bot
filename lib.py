@@ -15,7 +15,7 @@ if (not os.path.exists(CONFIG_FILE_PATH)):
 config = configparser.ConfigParser()
 config.read(CONFIG_FILE_PATH)
 
-api_key = config.get('RAPID_API', 'API_KEY')
+api_key = config.get('APP', 'API_KEY')
 
 
 def determine_answer(question: str, choices: List[str]):
