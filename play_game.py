@@ -1,8 +1,8 @@
 import asyncio
 import os
 import random
-from typing import List
 import warnings
+from typing import Dict
 
 from pyppeteer import launch
 from pyppeteer.element_handle import ElementHandle
@@ -62,9 +62,9 @@ async def play_game(invite_link):
             continue
 
         choices = await get_answer_choices(page)
-        await select_answer(page, random.choice(choices))
-        answer = determine_answer(current_question, choices)
-        await select_answer(page, answer)
+        await click_element(page, choices[random.choice(list(choices.keys()))])
+        answer = determine_answer(current_question, list(choices.keys()))
+        await click_element(page, choices[answer])
         previous_question = current_question
 
     await browser.close()
@@ -77,23 +77,21 @@ async def get_question_text(page: Page) -> str:
     return await get_text_content(element)
 
 
-async def get_answer_choices(page: Page):
+async def get_answer_choices(page: Page) -> Dict[str, ElementHandle]:
     selector = 'div.MuiGrid-root.MuiGrid-item button div:last-child'
     await page.waitForSelector(selector, {'visible': True})
     elements = await page.querySelectorAll(selector)
-    choices = []
+    results = {}
     for element in elements:
         textContent = await get_text_content(element)
-        choices.append(textContent)
-    return choices
+        results[textContent] = element
+    return results
 
 
-async def select_answer(page: Page, answer: str):
-    selector = f'div.MuiGrid-root.MuiGrid-item button[value="{answer}"]'
-    await page.waitForSelector(selector, visible=True)
+async def click_element(page: Page, element: ElementHandle):
     while (True):
         try:
-            await page.click(selector)
+            await element.click()
             break
         except:
             await page.waitFor(100)
